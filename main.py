@@ -7,22 +7,21 @@ from cc_lib.types.message._envelope import EventEnvelope
 from cc_lib.types.message._message import DeviceMessage
 import time 
 import pickle
+import json
+import pandas as pd 
+import os 
 
 file_path = "./Test-Data/strange_Kühlschrank_curve.pickle"
 
-def load_data(file_path):
-    with open(file_path, 'rb') as f:
-        data = pickle.load(f)
-    data_stream = []
-    for index in data.index:
-        data_stream.append(f"""
+def create_sample(power, time):
+    return f"""
     {{
             "ENERGY": {{
                 "ApparentPower": 8, 
                 "Current": 0.037, 
                 "Factor": 0.52, 
                 "Period": 0, 
-                "Power": {data.loc[index]}, 
+                "Power": {power}, 
                 "ReactivePower": 7, 
                 "Today": 0.676, 
                 "Total": 1057.112, 
@@ -31,25 +30,35 @@ def load_data(file_path):
                 "Voltage": 226, 
                 "Yesterday": 1.196
             }}, 
-            "Time": "{index.isoformat()}", 
+            "Time": "{time}", 
             "Time_unit": "Timestamp (ISO)"
         }}
-    """)
-    return data_stream
+    """
+
+def load_data(file_path):
+    with open(file_path, 'rb') as f:
+        data = pickle.load(f)
+
+    for i in range(len(data)-1):
+        current_sample = create_sample(data.iloc[i], data.index[i].isoformat())
+        next_sample = create_sample(data.iloc[i+1], data.index[i+1].isoformat())
+
+        yield current_sample, next_sample
 
 if __name__ == "__main__":
-    device_id = "anomaly-id"
+    device_id = os.environ["DEVICE_ID"]
     #hub_id = "urn:infai:ses:hub:14d8f5c1-e93c-4e64-9ffc-c228668859cf" # PROD
-    hub_id = "urn:infai:ses:hub:0789ec9b-cbbd-4a92-906c-9278d329056f"
-    hub_name = "Test"
+    #hub_id = "urn:infai:ses:hub:0789ec9b-cbbd-4a92-906c-9278d329056f"
+    hub_name = os.environ["HUB_NAME"]
+    hub_id = os.environ["HUB_ID"]
 
-    device_name = "Test-Anomaly-Device"
-    device_type_id = "urn:infai:ses:device-type:f4bb792a-b8d3-41d6-98a8-4407b5192d0e" 
+    device_name = os.environ["DEVICE_NAME"]
+    #device_type_id = "urn:infai:ses:device-type:f4bb792a-b8d3-41d6-98a8-4407b5192d0e" 
+    device_type_id = os.environ["DEVICE_TYPE_ID"]
 
     connector_client = cc_lib.client.Client()
     connector_client.init_hub(hub_id=hub_id, hub_name=hub_name)
     connector_client.connect(reconnect=True)
-
 
     device = Device(device_id, device_name, device_type_id)
     service = "SENSOR"
@@ -59,8 +68,10 @@ if __name__ == "__main__":
     except Exception as e:
         pass 
 
-    for sample in load_data(file_path):
+    for current_sample, next_sample in load_data("./Test-Data/strange_Kühlschrank_curve.pickle"):
         print("send sample")
-        message = DeviceMessage(data=sample)
+        message = DeviceMessage(data=current_sample)
         envelope = EventEnvelope(device=device, service=service, message=message)
         connector_client.send_event(envelope)
+        wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(json.loads(current_sample)['Time'])).total_seconds()
+        #time.sleep(wait_time)
