@@ -73,5 +73,6 @@ if __name__ == "__main__":
         message = DeviceMessage(data=current_sample)
         envelope = EventEnvelope(device=device, service=service, message=message)
         connector_client.send_event(envelope)
-        wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(json.loads(current_sample)['Time'])).total_seconds()
+        now = json.loads(current_sample)['Time']
+        wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(now)).total_seconds()
         #time.sleep(wait_time)
