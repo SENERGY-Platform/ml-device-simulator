@@ -46,6 +46,8 @@ def load_data(file_path):
         yield current_sample, next_sample
 
 if __name__ == "__main__":
+    time.sleep(60)
+
     device_id = os.environ["DEVICE_ID"]
     #hub_id = "urn:infai:ses:hub:14d8f5c1-e93c-4e64-9ffc-c228668859cf" # PROD
     #hub_id = "urn:infai:ses:hub:0789ec9b-cbbd-4a92-906c-9278d329056f"
