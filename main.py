@@ -69,10 +69,10 @@ if __name__ == "__main__":
         pass 
 
     for current_sample, next_sample in load_data("./Test-Data/strange_Kühlschrank_curve.pickle"):
-        print("send sample")
+        now = json.loads(current_sample)['Time']
+        print(f"send sample from {now}")
         message = DeviceMessage(data=current_sample)
         envelope = EventEnvelope(device=device, service=service, message=message)
         connector_client.send_event(envelope)
-        now = json.loads(current_sample)['Time']
         wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(now)).total_seconds()
         #time.sleep(wait_time)
