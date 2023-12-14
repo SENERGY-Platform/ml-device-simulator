@@ -70,7 +70,7 @@ if __name__ == "__main__":
     except Exception as e:
         pass 
 
-    for current_sample, next_sample in load_data("./Test-Data/strange_Kühlschrank_curve.pickle"):
+    for current_sample, next_sample in load_data(file_path):
         now = json.loads(current_sample)['Time']
         print(f"send sample from {now}")
         message = DeviceMessage(data=current_sample)
