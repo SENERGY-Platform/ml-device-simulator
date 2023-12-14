@@ -11,7 +11,7 @@ import json
 import pandas as pd 
 import os 
 
-file_path = "./Test-Data/strange_Kühlschrank_curve.pickle"
+file_path = "./Test-Data/Kühlschrank_Outlier_Test.pickle"
 
 def create_sample(power, time):
     return f"""
