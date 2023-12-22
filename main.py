@@ -45,31 +45,69 @@ def load_data(file_path):
 
         yield current_sample, next_sample
 
-if __name__ == "__main__":
-    time.sleep(60)
+def send_missing_power(connector_client, device, service):
+    missing_power_message = """
+    {
+            "ENERGY": {
+                "ApparentPower": 8, 
+                "Current": 0.037, 
+                "Factor": 0.52, 
+                "Period": 0, 
+                "ReactivePower": 7, 
+                "Today": 0.676, 
+                "Total": 1057.112, 
+                "TotalStartTime": "2022-08-07T09:30:03", 
+                "Total_unit": "Kilowatt Hours", 
+                "Voltage": 226, 
+                "Yesterday": 1.196
+            }, 
+            "Time": "2022-08-07T09:30:03", 
+            "Time_unit": "Timestamp (ISO)"
+        }
+    """
+    message = DeviceMessage(data=missing_power_message)
+    envelope = EventEnvelope(device=device, service=service, message=message)
+    connector_client.send_event(envelope)
 
-    device_id = os.environ["DEVICE_ID"]
-    #hub_id = "urn:infai:ses:hub:14d8f5c1-e93c-4e64-9ffc-c228668859cf" # PROD
-    #hub_id = "urn:infai:ses:hub:0789ec9b-cbbd-4a92-906c-9278d329056f"
-    hub_name = os.environ["HUB_NAME"]
-    hub_id = os.environ["HUB_ID"]
+def send_missing_energy(connector_client, device, service):
+    missing_power_message = """
+    {
+            "ENERbbbbbGY": {
+                "ApparentPower": 8, 
+                "Current": 0.037, 
+                "Factor": 0.52, 
+                "Period": 0, 
+                "ReactivePower": 7, 
+                "Today": 0.676, 
+                "Total": 1057.112, 
+                "TotalStartTime": "2022-08-07T09:30:03", 
+                "Total_unit": "Kilowatt Hours", 
+                "Voltage": 226, 
+                "Yesterday": 1.196
+            }, 
+            "Time": "2022-08-07T09:30:03", 
+            "Time_unit": "Timestamp (ISO)"
+        }
+    """
+    message = DeviceMessage(data=missing_power_message)
+    envelope = EventEnvelope(device=device, service=service, message=message)
+    connector_client.send_event(envelope)
 
-    device_name = os.environ["DEVICE_NAME"]
-    #device_type_id = "urn:infai:ses:device-type:f4bb792a-b8d3-41d6-98a8-4407b5192d0e" 
-    device_type_id = os.environ["DEVICE_TYPE_ID"]
-
+def run(hub_id, hub_name, device_name, device_id, device_type_id):
     connector_client = cc_lib.client.Client()
     connector_client.init_hub(hub_id=hub_id, hub_name=hub_name)
     connector_client.connect(reconnect=True)
 
-    device = Device(device_id, device_name, device_type_id)
+    device = Device(device_id, device_name, device_type_id, [])
     service = "SENSOR"
 
-    try:
+    if os.environ.get("ONLY_CREATE_DEVICE", None) == "true":
         connector_client.add_device(device)
-    except Exception as e:
-        pass 
+        return
 
+    send_missing_energy(connector_client, device, service)
+    send_missing_power(connector_client, device, service)
+    
     for current_sample, next_sample in load_data(file_path):
         now = json.loads(current_sample)['Time']
         print(f"send sample from {now}")
@@ -78,3 +116,14 @@ if __name__ == "__main__":
         connector_client.send_event(envelope)
         wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(now)).total_seconds()
         #time.sleep(wait_time)
+
+if __name__ == "__main__":
+    device_id = os.environ["DEVICE_ID"]
+    hub_name = os.environ["HUB_NAME"]
+    hub_id = os.environ.get("HUB_ID", None)
+
+    device_name = os.environ["DEVICE_NAME"]
+    #device_type_id = "urn:infai:ses:device-type:f4bb792a-b8d3-41d6-98a8-4407b5192d0e" 
+    device_type_id = os.environ["DEVICE_TYPE_ID"]
+
+    run(hub_id, hub_name, device_name, device_id, device_type_id)
