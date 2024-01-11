@@ -36,8 +36,7 @@ def create_sample(power, time):
     """
 
 def load_data(file_path):
-    with open(file_path, 'rb') as f:
-        data = pickle.load(f)
+    data = pd.read_pickle(file_path)
 
     for i in range(len(data)-1):
         current_sample = create_sample(data.iloc[i], data.index[i].isoformat())
