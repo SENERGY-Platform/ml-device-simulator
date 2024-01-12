@@ -111,7 +111,15 @@ def run(hub_id, hub_name, device_name, device_id, device_type_id):
         print(f"send sample from {now}")
         message = DeviceMessage(data=current_sample)
         envelope = EventEnvelope(device=device, service=service, message=message)
-        connector_client.send_event(envelope)
+
+        for i in enumerate([1,2,3]):
+            try:
+                connector_client.send_event(envelope)
+                break
+            except:
+                time.sleep(30)
+
+    
         wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(now)).total_seconds()
         #time.sleep(wait_time)
 
