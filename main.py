@@ -36,12 +36,12 @@ def create_sample(power, time):
     """
 
 def load_data(file_path):
-    data = pd.read_pickle(file_path)
-
+    with open(file_path, "rb") as f:
+        data = pickle.load(f)
+    
     for i in range(len(data)-1):
-        current_sample = create_sample(data.iloc[i], data.index[i].isoformat())
-        next_sample = create_sample(data.iloc[i+1], data.index[i+1].isoformat())
-
+        current_sample = create_sample(data.iloc[i][0], data.index[i].isoformat())
+        next_sample = create_sample(data.iloc[i+1][0], data.index[i+1].isoformat())
         yield current_sample, next_sample
 
 def send_missing_power(connector_client, device, service):
@@ -104,8 +104,8 @@ def run(hub_id, hub_name, device_name, device_id, device_type_id):
         connector_client.add_device(device)
         return
 
-    send_missing_energy(connector_client, device, service)
-    send_missing_power(connector_client, device, service)
+    #send_missing_energy(connector_client, device, service)
+    #send_missing_power(connector_client, device, service)
     
     for current_sample, next_sample in load_data(file_path):
         now = json.loads(current_sample)['Time']
