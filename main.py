@@ -93,7 +93,6 @@ def send_missing_energy(connector_client, device, service):
 
 def run(hub_id, hub_name, device_name, device_id, device_type_id):
     connector_client = cc_lib.client.Client()
-    connector_client.init_hub(hub_id=hub_id, hub_name=hub_name)
     connector_client.connect(reconnect=True)
 
     device = Device(device_id, device_name, device_type_id, [])
