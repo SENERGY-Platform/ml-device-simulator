@@ -39,8 +39,8 @@ def load_data(file_path):
     data = pd.read_pickle(file_path)
 
     for i in range(len(data)-1):
-        current_sample = create_sample(data.iloc[i], data.index[i])#.isoformat())
-        next_sample = create_sample(data.iloc[i+1], data.index[i+1])#.isoformat())
+        current_sample = create_sample(data.iloc[i].values[0], data.index[i])#.isoformat())
+        next_sample = create_sample(data.iloc[i+1].values[0], data.index[i+1])#.isoformat())
         yield current_sample, next_sample
 
 def send_missing_power(connector_client, device, service):
