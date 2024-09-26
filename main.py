@@ -98,7 +98,9 @@ def run(hub_id, hub_name, device_name, device_id, device_type_id):
     device = Device(device_id, device_name, device_type_id, [])
     service = "SENSOR"
 
-    connector_client.add_device(device)
+    if os.environ.get("ONLY_CREATE_DEVICE", None) == "true":
+        connector_client.add_device(device)
+        return
 
     #send_missing_energy(connector_client, device, service)
     #send_missing_power(connector_client, device, service)
