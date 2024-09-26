@@ -117,6 +117,7 @@ def run(hub_id, hub_name, device_name, device_id, device_type_id):
                 break
             except:
                 time.sleep(30)
+                print("Sample not sent!")
 
     
         wait_time = (pd.to_datetime(json.loads(next_sample)['Time']) - pd.to_datetime(now)).total_seconds()
