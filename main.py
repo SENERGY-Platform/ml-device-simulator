@@ -106,7 +106,6 @@ def run(hub_id, hub_name, device_name, device_id, device_type_id):
     #send_missing_power(connector_client, device, service)
     
     for current_sample, next_sample in load_data(file_path):
-        print(current_sample)
         now = json.loads(current_sample)['Time']
         print(f"send sample from {now}")
         message = DeviceMessage(data=current_sample)
